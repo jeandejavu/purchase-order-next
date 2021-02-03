@@ -1,5 +1,7 @@
+import Container from '../components/Container'
+
 const Home: React.FC = () => {
-  return <div>Welcome to Next.js!</div>
+  return <Container />
 }
 
 export default Home
