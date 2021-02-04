@@ -1,17 +1,16 @@
+import axios from 'axios'
 import { useState } from 'react'
 import Modal from '../components/Modal'
+import { ProdutoModel } from '../entities/Produto'
 
-type ProdutoModel = {
-  codigo: string
-  descricao: string
-  preco_minimo: number
-  observacao: string
+type CadastroProdutoProps = {
+  data: ProdutoModel[]
 }
 
-const CadastroProduto: React.FC = () => {
+const CadastroProduto: React.FC<CadastroProdutoProps> = ({ data = [] }) => {
   const [isModalOpen, setModalOpen] = useState(false)
-  const [produtos, setProdutos] = useState<ProdutoModel[]>([])
-  const [filterProdutos, setFilterProdutos] = useState<ProdutoModel[]>([])
+  const [produtos, setProdutos] = useState<ProdutoModel[]>(data)
+  const [filterProdutos, setFilterProdutos] = useState<ProdutoModel[]>(data)
 
   const [codigo, setCodigo] = useState('')
   const [descricao, setDescricao] = useState('')
@@ -35,25 +34,22 @@ const CadastroProduto: React.FC = () => {
     )
   }
 
-  function onOkModal(): void {
-    setProdutos([
-      ...produtos.filter((produto) => produto.codigo !== codigo),
-      {
+  async function onOkModal(): Promise<void> {
+    const produto = produtos.find((produto) => produto.codigo === codigo)
+
+    const { data } = await axios.post('/api/produtos', {
+      produto: {
+        ...produto,
         codigo,
         descricao,
         observacao,
         preco_minimo,
       },
-    ])
-    setFilterProdutos([
-      ...filterProdutos.filter((produto) => produto.codigo !== codigo),
-      {
-        codigo,
-        descricao,
-        observacao,
-        preco_minimo,
-      },
-    ])
+    })
+
+    setProdutos([...produtos.filter((produto) => produto.codigo !== codigo), data])
+    setFilterProdutos([...filterProdutos.filter((produto) => produto.codigo !== codigo), data])
+
     clearForm()
     setModalOpen(false)
   }
@@ -62,8 +58,8 @@ const CadastroProduto: React.FC = () => {
     setModalOpen(false)
   }
 
-  function selectProduto(codigo: string): void {
-    const produto = produtos.find((produto) => produto.codigo === codigo)
+  function selectProduto(_id: string): void {
+    const produto = produtos.find((produto) => produto._id === _id)
     if (!produto) return
 
     setCodigo(produto.codigo)
@@ -116,12 +112,12 @@ const CadastroProduto: React.FC = () => {
             </a>
           </li>
           {filterProdutos.map((produto) => (
-            <li key={produto.codigo}>
+            <li key={produto._id}>
               <a
                 href="#"
                 onClick={(e) => {
                   e.preventDefault()
-                  selectProduto(produto.codigo)
+                  selectProduto(produto._id)
                   setModalOpen(true)
                 }}
                 className="hover:bg-blue-500 hover:border-transparent hover:shadow-lg group block rounded-lg p-4 border border-gray-200"
