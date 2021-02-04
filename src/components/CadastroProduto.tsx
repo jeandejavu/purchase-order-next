@@ -12,6 +12,7 @@ const CadastroProduto: React.FC<CadastroProdutoProps> = ({ data = [] }) => {
   const [produtos, setProdutos] = useState<ProdutoModel[]>(data)
   const [filterProdutos, setFilterProdutos] = useState<ProdutoModel[]>(data)
 
+  const [id, setId] = useState('')
   const [codigo, setCodigo] = useState('')
   const [descricao, setDescricao] = useState('')
   const [preco_minimo, setPreco] = useState(0)
@@ -22,6 +23,7 @@ const CadastroProduto: React.FC<CadastroProdutoProps> = ({ data = [] }) => {
   }
 
   function clearForm(): void {
+    setId('')
     setCodigo('')
     setDescricao('')
     setPreco(0)
@@ -35,7 +37,7 @@ const CadastroProduto: React.FC<CadastroProdutoProps> = ({ data = [] }) => {
   }
 
   async function onOkModal(): Promise<void> {
-    const produto = produtos.find((produto) => produto.codigo === codigo)
+    const produto = produtos.find((produto) => produto._id === id)
 
     const { data } = await axios.post('/api/produtos', {
       produto: {
@@ -47,8 +49,17 @@ const CadastroProduto: React.FC<CadastroProdutoProps> = ({ data = [] }) => {
       },
     })
 
-    setProdutos([...produtos.filter((produto) => produto.codigo !== codigo), data])
-    setFilterProdutos([...filterProdutos.filter((produto) => produto.codigo !== codigo), data])
+    setProdutos([...produtos.filter((produto) => produto._id !== id), data])
+    setFilterProdutos([...filterProdutos.filter((produto) => produto._id !== id), data])
+
+    clearForm()
+    setModalOpen(false)
+  }
+
+  async function onDeleteModal(id: string): Promise<void> {
+    await axios.delete(`/api/produtos/${id}`)
+    setProdutos(produtos.filter((produto) => produto._id !== id))
+    setFilterProdutos(filterProdutos.filter((produto) => produto._id !== id))
 
     clearForm()
     setModalOpen(false)
@@ -62,6 +73,7 @@ const CadastroProduto: React.FC<CadastroProdutoProps> = ({ data = [] }) => {
     const produto = produtos.find((produto) => produto._id === _id)
     if (!produto) return
 
+    setId(produto._id)
     setCodigo(produto.codigo)
     setDescricao(produto.descricao)
     setPreco(produto.preco_minimo)
@@ -138,6 +150,7 @@ const CadastroProduto: React.FC<CadastroProdutoProps> = ({ data = [] }) => {
           ))}
         </ul>
       </section>
+
       {isModalOpen ? (
         <Modal title={'Cadastro de Produtos'} onClose={onCloseModal}>
           <div className="sm:mt-0">
@@ -155,6 +168,7 @@ const CadastroProduto: React.FC<CadastroProdutoProps> = ({ data = [] }) => {
                             Codigo
                           </label>
                           <input
+                            readOnly={id !== ''}
                             type="text"
                             name="codigo"
                             id="codigo"
@@ -221,25 +235,55 @@ const CadastroProduto: React.FC<CadastroProdutoProps> = ({ data = [] }) => {
                     </div>
                   </div>
 
-                  <div className="flex justify-end pt-2">
-                    <button
-                      className="px-4 bg-transparent p-3 rounded-lg text-blue-500 hover:bg-gray-100 hover:text-blue-400 mr-2"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        onOkModal()
-                      }}
-                    >
-                      Salvar
-                    </button>
-                    <button
-                      className="px-4 bg-blue-500 p-3 rounded-lg text-white hover:bg-blue-400"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        onCancelModal()
-                      }}
-                    >
-                      Cancelar
-                    </button>
+                  <div className="flex justify-between pt-2">
+                    {id ? (
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          onDeleteModal(id)
+                        }}
+                        className="px-4 p-3 ml-6 bg-transparent rounded-lg text-red-500 hover:bg-gray-100 hover:text-red-400"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          width="20"
+                          height="20"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      </a>
+                    ) : (
+                      <a>&nbsp;</a>
+                    )}
+                    <div className="flex justify-end">
+                      <button
+                        className="px-4 bg-transparent p-3 rounded-lg text-blue-500 hover:bg-gray-100 hover:text-blue-400 mr-2"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          onOkModal()
+                        }}
+                      >
+                        Salvar
+                      </button>
+                      <button
+                        className="px-4 bg-blue-500 p-3 rounded-lg text-white hover:bg-blue-400"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          onCancelModal()
+                        }}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
                   </div>
                 </form>
               </div>
