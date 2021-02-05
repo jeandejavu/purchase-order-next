@@ -1,12 +1,21 @@
 import Navigation from '../components/Navigation'
+import { signIn, useSession } from 'next-auth/client'
 
 const Container: React.FC = ({ children }) => {
+  const [session, loading] = useSession()
+  if (!loading && !session) {
+    signIn('auth0')
+  }
   return (
     <>
-      <div className="md:container md:mx-auto">
-        <Navigation />
-        {children}
-      </div>
+      {loading || !session ? (
+        <h1>Carregando</h1>
+      ) : (
+        <div className="md:container md:mx-auto">
+          <Navigation />
+          {children}
+        </div>
+      )}
     </>
   )
 }

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import { signOut } from 'next-auth/client'
 
 const Navigation: React.FC = () => (
   <div className="relative pt-6 px-4 sm:px-6 lg:px-8">
@@ -33,6 +34,16 @@ const Navigation: React.FC = () => (
         <Link href="/orcamentos">
           <a className="font-medium text-gray-500 hover:text-gray-900">Orçamentos</a>
         </Link>
+        <a
+          href="#"
+          onClick={(e) => {
+            e.preventDefault()
+            signOut()
+          }}
+          className="font-medium text-gray-500 hover:text-gray-900"
+        >
+          Sair
+        </a>
       </div>
     </nav>
   </div>
