@@ -19,7 +19,7 @@ const Produto: React.FC<ProdutoProps> = ({ data = [] }) => {
 export default Produto
 
 export const getServerSideProps: GetServerSideProps = async () => {
-  const { data } = await axios.get('http://localhost:3000/api/produtos')
+  const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}api/produtos`)
 
   return {
     props: {
