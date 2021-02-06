@@ -4,9 +4,7 @@ import { signIn, useSession } from 'next-auth/client'
 const Container: React.FC = ({ children }) => {
   const [session, loading] = useSession()
   if (!loading && !session) {
-    signIn('auth0', {
-      callbackUrl: 'https://purchase-order-next.vercel.app/api/auth/callback/auth0',
-    })
+    signIn('auth0')
   }
   return (
     <>
